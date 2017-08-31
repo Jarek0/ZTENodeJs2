@@ -13,7 +13,7 @@ exports.default = module = {
         rawFile.setRequestHeader('Content-Type', 'application/json');
         rawFile.send();
 
-        return rawFile.responseText;
+        return JSON.parse(rawFile.responseText);
     },
     saveToFile: function saveToFile(path, object) {
         fs.writeFile(path, '', function () {

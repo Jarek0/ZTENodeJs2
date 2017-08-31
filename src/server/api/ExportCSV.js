@@ -1,18 +1,18 @@
 
-module.exports={
-    createRow(feature) {
-        let row = '';
-        //dla każdego przejazdu
-        let keys =Object.keys(feature);
-        for(let i = 0;i<keys.length;i++) {
-            row += feature[keys[i]];
-            row += ';';
-        }
-        row += '\n';
-        return row;
-    },
+function createRow(feature) {
+    let row = '';
+    //dla każdego przejazdu
+    let keys =Object.keys(feature);
+    for(let i = 0;i<keys.length;i++) {
+        row += feature[keys[i]];
+        row += ';';
+    }
+    row += '\n';
+    return row;
+}
 
-    prepare(query) {
+module.exports={
+    prepare: function(query) {
         let rows = [];
         let row;
         //stworzenie nagłówków
@@ -23,41 +23,18 @@ module.exports={
             for(let j=0;j<query[i].length;j++){
                 row+=createRow(query[i][j]);
             }
-
-            //wprowadzenie numeru przystanku
-
-            //dodanie rzędu do tablicy rzędów
             rows=(row);
         }
         return rows;
     },
-    download(query) {
-        let filename = 'autobusy.csv';
-
+    download: function(query) {
         let fs = require('fs');
-
-        fs.writeFile('form-tracking/formList.csv', query, 'utf8', function (err) {
+        fs.writeFile('autobusy.csv', query, 'utf8', function (err) {
             if (err) {
                 console.log('Some error occured - file either not saved or corrupted file saved.');
             } else{
-                console.log('It\'s saved!');
+                console.log('Its saved!');
             }
         });
-        let blob = new Blob([query], {type: 'text/csv;charset=utf-8;'});
-        if (navigator.msSaveBlob) { // IE 10+
-            navigator.msSaveBlob(blob, filename);
-        } else {
-            let link = document.createElement('a');
-            if (link.download !== undefined) { // feature detection
-                // Browsers that support HTML5 download attribute
-                let url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', filename);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        }
     }
 };

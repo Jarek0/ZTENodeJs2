@@ -9,7 +9,10 @@ let linesWithBusstopsPosition = {};
 let busstopsWithLineNumber = {};
 let linesAtBusstop = {};
 
-let preparedBusstops = {};
+let preparedBusstops = [];
+let finalResults = [];
+
+let preferedStartHour = 7;
 
 export default module={
     getDataFromZTMAndSaveItToCSV(dropDatabase){
@@ -127,9 +130,11 @@ export default module={
                         direction => {
                             direction.data.forEach( busstopOnLine => {
                                 let preparedBusstop = {};
-                                preparedBusstop.line_no = linesWithBusstopsPosition.line_no;
-                                preparedBusstop.schedule_id = linesWithBusstopsPosition.schedule_id;
-                                preparedBusstop.direction_name = linesWithBusstopsPosition.direction_name;
+
+                                preparedBusstop.line_no = lineWithBusstopPosition.line_no;
+                                preparedBusstop.schedule_id = lineWithBusstopPosition.schedule_id;
+                                preparedBusstop.direction_name = direction.direction_name;
+
                                 preparedBusstop.id = busstopOnLine.busstop;
                                 preparedBusstop.position = busstopOnLine.position-1;
 
@@ -137,7 +142,27 @@ export default module={
                                 preparedBusstop.latitude = busstop.latitude;
                                 preparedBusstop.longitude = busstop.longitude;
 
-                                preparedBusstops.push(preparedBusstop);
+                                let lineAtBusstop = linesAtBusstop.find((lineAtBusstop) => {
+                                    return (preparedBusstop.line_no === lineAtBusstop.line_no && lineAtBusstop.busstop_no === preparedBusstop.id);
+                                });
+
+                                if (lineAtBusstop !== undefined && lineAtBusstop.data!== undefined)
+                                {
+                                    if(lineAtBusstop.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']){
+                                        preparedBusstop.hours =
+                                            this.flatHoursTableToTableOfMinutes(lineAtBusstop.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']);
+                                    }
+                                    else if(lineAtBusstop.data.godziny['POWSZEDNI LETNI']){
+                                        preparedBusstop.hours =
+                                            this.flatHoursTableToTableOfMinutes(lineAtBusstop.data.godziny['POWSZEDNI LETNI']);
+                                    }
+                                    else{
+                                        preparedBusstop.hours =
+                                            this.flatHoursTableToTableOfMinutes(lineAtBusstop.data.godziny);
+                                    }
+                                }
+                                if(preparedBusstop.hours!==undefined && preparedBusstop.hours.length>0)
+                                    preparedBusstops.push(preparedBusstop);
                             });
                         }
                     )
@@ -145,126 +170,56 @@ export default module={
         );
     },
 
+    flatHoursTableToTableOfMinutes(hours){
+        let tableOfMinutes = [];
+        for(let hour in hours){
+            if (hours.hasOwnProperty(hour) && hours[hour] instanceof Array) {
+                hours[hour].forEach( minute => {
+                    if(minute.indexOf('a')===-1)
+                    tableOfMinutes.push(parseInt(hour)*60+parseInt(minute));
+                })
+            }
+        }
+        return tableOfMinutes;
+    },
+
     calculateResults() {
-        let line=[];
-        let leavesArray = [];
-        let differences=[];
-        linesAtBusstop = this.changeArray();
-        let keys = Object.keys(linesAtBusstop);
-        for(let i = 0;i<keys.length;i++) {
-            let klucze = Object.keys(linesAtBusstop[keys[i]]);
-            for (let j = 0; j <klucze.length; j++) {
-                leavesArray = findTime(linesAtBusstop[keys[i]][klucze[j]]);
-                if (leavesArray) {
-                    differences.push(substractTime(leavesArray, preparedBusstops));
-                }
+        let previousTime;
+        let currentLine;
+        for(let preparedBusStopPosition=0;preparedBusStopPosition<preparedBusstops.length;preparedBusStopPosition++){
+            if(preparedBusStopPosition>0 && preparedBusstops[preparedBusStopPosition].line_no===currentLine){
+                let time = this.findTime(preparedBusstops[preparedBusStopPosition].hours,previousTime);
+                let timeDifrence = time - previousTime;
+                let finalResult = {};
+                finalResult.line_no = preparedBusstops[preparedBusStopPosition].line_no;
+                finalResult.direction_name = preparedBusstops[preparedBusStopPosition].direction_name;
+                finalResult.id = preparedBusstops[preparedBusStopPosition].id;
+                finalResult.position = preparedBusstops[preparedBusStopPosition].position;
+                finalResult.latitude = preparedBusstops[preparedBusStopPosition].latitude;
+                finalResult.longitude = preparedBusstops[preparedBusStopPosition].longitude;
+                finalResult.longitude = preparedBusstops[preparedBusStopPosition].longitude;
+                finalResult.timeDifrence = timeDifrence;
+                finalResults.push(finalResult);
+                previousTime = time;
             }
-
-        }
-        line=(ExportCSV.prepare(differences));
-        ExportCSV.download(line);
-    },
-
-    changeArray() {
-        let schedule={};
-        preparedBusstops.forEach(busstop=>{
-            if(!schedule[busstop.line_no]) {
-                schedule[busstop.line_no] = {};
-            }
-            schedule[busstop.line_no][busstop.direction_name] = [];
-
-        });
-        preparedBusstops.forEach(
-            (preparedBusstop) => {
-                let element = linesAtBusstop.find((busstop) => {
-                    return (preparedBusstop.line_no === busstop.line_no && busstop.busstop_no === preparedBusstop.id);
-                });
-                if (element !== undefined&&element.data!== undefined)
-                {
-                    element.data.direction_name=preparedBusstop.direction_name;
-                    element.data.position=preparedBusstop.position;
-                    let hours;
-                    if(element.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']){
-                        hours = element.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY'];
-                    }
-                    else if(element.data.godziny['POWSZEDNI LETNI']){
-                        hours = element.data.godziny['POWSZEDNI LETNI'];
-                    }
-                    else{
-                        hours = element.data.godziny;
-                    }
-
-                    element.data.godziny=hours;
-                    schedule[element.line_no][element.data.direction_name].push(element.data);
-                }
-            }
-        );
-        return schedule;
-    },
-
-    substractTime(leavesArray, busstopResponse){
-        let ride = [];
-        for(let i = 1; i<leavesArray.length; i++){
-            ride[i-1]={};
-            let result = leavesArray[i].leaveTime - leavesArray[i - 1].leaveTime;
-            if (result < 0)
-                result += 60;
-            let directionName = leavesArray[i].dir;
-            let coorX;
-            let coorY;
-            for(let j = 0; j<busstopResponse.length;j++){
-                if(leavesArray[i].busstopId===busstopResponse[j].id){
-                    coorX=busstopResponse[j].longitude;
-                    coorY=busstopResponse[j].latitude;
-                    break;
-                }
-            }
-            ride[i-1]={id:leavesArray[i].busstopId,dir:directionName,diff:result,longitude:coorX,latitude:coorY, pos: leavesArray[i].pos, line_no:leavesArray[i].linia};
-        }
-        return ride;
-    },
-
-    loops(keys, stopsArray){
-        let i = 0;
-        for(let x = 0;x<keys.length;x++){
-            for(let j = 0;j<stopsArray[0].godziny[keys[x]].length;j++){
-                if(parseInt(keys[x])===7){
-                    return i;
-                }
-                i++;
+            else
+            {
+                previousTime = this.findTime(preparedBusstops[preparedBusStopPosition].hours,preferedStartHour*60);
+                currentLine = preparedBusstops[preparedBusStopPosition].line_no;
             }
         }
-        return i;
+        let savedResult;
+        Database.saveToFile("finalResults.txt",finalResults);
+        savedResult=(ExportCSV.prepare(finalResults));
+        ExportCSV.download(savedResult);
     },
 
-    findingLoops(stopsArray, keys, i) {
-        let z = 0;
-        console.log(stopsArray.godziny);
-        for(let x = 0;x<keys.length;x++){
-            let minutes = stopsArray.godziny[keys[x]];
-            for(let w = 0; w<minutes.length;w++){
-                if(i===z){
-                    console.log(keys[x],minutes[w]);
-                    console.log(minutes);
-                    return {linia : stopsArray.linia, dir:stopsArray.direction_name, busstopId: stopsArray.przystanek, pos:stopsArray.position, leaveTime: minutes[w]};
-                }
-                z++;
-            }
+    findTime(hours,previousTime) {
+        let wantedTime = hours[0];
+        for(let hour in hours){
+            if(Math.abs(previousTime - hour) < Math.abs(previousTime - wantedTime) && hour>previousTime)
+                wantedTime = hour;
         }
-    },
-
-    findTime(stopsArray) {
-        if (stopsArray[0]) {
-            let leavesArray = [];
-            console.log(stopsArray[0].direction_name);
-            let keys = Object.keys(stopsArray[0].godziny);
-            let i = loops(keys, stopsArray);
-            for (let j = 0; j < stopsArray.length; j++) {
-                keys = Object.keys(stopsArray[j].godziny);
-                leavesArray.push(findingLoops(stopsArray[j], keys, i));
-            }
-            //console.log(leavesArray);
-            return leavesArray;
-        }
+        return wantedTime;
     }
 };
