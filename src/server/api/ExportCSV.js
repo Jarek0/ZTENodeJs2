@@ -21,9 +21,10 @@ module.exports={
         //dla każdego przystanku tworzy się wiersz pliku csv
         for(let i = 0;i<query.length;i++){
             for(let j=0;j<query[i].length;j++){
-                row+=createRow(query[i][j]);
-            }
+                if(query[i][j])
+                row+=this.createRow(query[i][j]);
 
+            }
             //wprowadzenie numeru przystanku
 
             //dodanie rzędu do tablicy rzędów
@@ -32,18 +33,16 @@ module.exports={
         return rows;
     },
     download(query) {
-        let filename = 'autobusy.csv';
 
         let fs = require('fs');
-
-        fs.writeFile('form-tracking/formList.csv', query, 'utf8', function (err) {
+        fs.writeFile('Autobusy.csv', query, 'utf8', function (err) {
             if (err) {
                 console.log('Some error occured - file either not saved or corrupted file saved.');
             } else{
-                console.log('It\'s saved!');
+                console.log('Its saved!');
             }
         });
-        let blob = new Blob([query], {type: 'text/csv;charset=utf-8;'});
+        /*let blob = new Blob([query], {type: 'text/csv;charset=utf-8;'});
         if (navigator.msSaveBlob) { // IE 10+
             navigator.msSaveBlob(blob, filename);
         } else {
@@ -58,6 +57,6 @@ module.exports={
                 link.click();
                 document.body.removeChild(link);
             }
-        }
+        }*/
     }
 };

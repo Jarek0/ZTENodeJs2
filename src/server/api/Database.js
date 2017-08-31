@@ -8,7 +8,7 @@ export default module= {
         rawFile.setRequestHeader('Content-Type', 'application/json');
         rawFile.send();
 
-        return rawFile.responseText
+        return JSON.parse(rawFile.responseText);
     },
 
     saveToFile(path,object){

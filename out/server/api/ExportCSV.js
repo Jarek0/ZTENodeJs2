@@ -21,9 +21,8 @@ module.exports = {
         //dla każdego przystanku tworzy się wiersz pliku csv
         for (var i = 0; i < query.length; i++) {
             for (var j = 0; j < query[i].length; j++) {
-                row += createRow(query[i][j]);
+                if (query[i][j]) row += this.createRow(query[i][j]);
             }
-
             //wprowadzenie numeru przystanku
 
             //dodanie rzędu do tablicy rzędów
@@ -32,27 +31,23 @@ module.exports = {
         return rows;
     },
     download: function download(query) {
-        var filename = 'autobusy.csv';
 
         var fs = require('fs');
-
-        fs.writeFile('form-tracking/formList.csv', query, 'utf8', function (err) {
+        fs.writeFile('Autobusy.csv', query, 'utf8', function (err) {
             if (err) {
                 console.log('Some error occured - file either not saved or corrupted file saved.');
             } else {
-                console.log('It\'s saved!');
+                console.log('Its saved!');
             }
         });
-        var blob = new Blob([query], { type: 'text/csv;charset=utf-8;' });
-        if (navigator.msSaveBlob) {
-            // IE 10+
+        /*let blob = new Blob([query], {type: 'text/csv;charset=utf-8;'});
+        if (navigator.msSaveBlob) { // IE 10+
             navigator.msSaveBlob(blob, filename);
         } else {
-            var link = document.createElement('a');
-            if (link.download !== undefined) {
-                // feature detection
+            let link = document.createElement('a');
+            if (link.download !== undefined) { // feature detection
                 // Browsers that support HTML5 download attribute
-                var url = URL.createObjectURL(blob);
+                let url = URL.createObjectURL(blob);
                 link.setAttribute('href', url);
                 link.setAttribute('download', filename);
                 link.style.visibility = 'hidden';
@@ -60,6 +55,6 @@ module.exports = {
                 link.click();
                 document.body.removeChild(link);
             }
-        }
+        }*/
     }
 };
