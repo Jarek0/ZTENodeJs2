@@ -20,10 +20,8 @@ module.exports={
         rows.push(row);
         //dla każdego przystanku tworzy się wiersz pliku csv
         for(let i = 0;i<query.length;i++){
-            for(let j=0;j<query[i].length;j++){
-                row+=createRow(query[i][j]);
-            }
-            rows=(row);
+            row=createRow(query[i]);
+            rows.push(row);
         }
         return rows;
     },

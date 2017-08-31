@@ -4,10 +4,7 @@
     <list default="true" id="21367b93-da11-4651-91a5-f5689259a1a4" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/autobusy.csv" afterPath="$PROJECT_DIR$/autobusy.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/finalResults.txt" afterPath="$PROJECT_DIR$/finalResults.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/server/api/AlgorithmMaster.js" afterPath="$PROJECT_DIR$/out/server/api/AlgorithmMaster.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/server/api/ExportCSV.js" afterPath="$PROJECT_DIR$/out/server/api/ExportCSV.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/server/api/AlgorithmMaster.js" afterPath="$PROJECT_DIR$/src/server/api/AlgorithmMaster.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/server/api/ExportCSV.js" afterPath="$PROJECT_DIR$/src/server/api/ExportCSV.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -46,8 +43,8 @@
       <file leaf-file-name="AlgorithmMaster.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/server/api/AlgorithmMaster.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="208" column="61" lean-forward="false" selection-start-line="208" selection-start-column="61" selection-end-line="208" selection-end-column="61" />
+            <state relative-caret-position="306">
+              <caret line="163" column="54" lean-forward="false" selection-start-line="163" selection-start-column="0" selection-end-line="164" selection-end-column="0" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
               </folding>
@@ -65,21 +62,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Network.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/server/api/Network.js">
+      <file leaf-file-name="ExportCSV.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/server/api/ExportCSV.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="128">
-              <caret line="27" column="27" lean-forward="false" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="27" />
+            <state relative-caret-position="357">
+              <caret line="33" column="42" lean-forward="true" selection-start-line="33" selection-start-column="42" selection-end-line="33" selection-end-column="42" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ExportCSV.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/server/api/ExportCSV.js">
+      <file leaf-file-name="Network.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/server/api/Network.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="5" column="26" lean-forward="false" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
+            <state relative-caret-position="-433">
+              <caret line="27" column="27" lean-forward="false" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -117,8 +114,8 @@
         <option value="$PROJECT_DIR$/src/server/api/Export.js" />
         <option value="$PROJECT_DIR$/src/server/server.js" />
         <option value="$PROJECT_DIR$/src/server/api/Database.js" />
-        <option value="$PROJECT_DIR$/src/server/api/ExportCSV.js" />
         <option value="$PROJECT_DIR$/src/server/api/AlgorithmMaster.js" />
+        <option value="$PROJECT_DIR$/src/server/api/ExportCSV.js" />
       </list>
     </option>
   </component>
@@ -374,12 +371,12 @@
       <workItem from="1503986958762" duration="25562000" />
       <workItem from="1504070059161" duration="10592000" />
       <workItem from="1504084498535" duration="13282000" />
-      <workItem from="1504155987774" duration="19194000" />
+      <workItem from="1504155987774" duration="20207000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="92216000" />
+    <option name="totallyTimeSpent" value="93229000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -643,9 +640,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/server/api/Network.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="128">
+        <state relative-caret-position="-433">
           <caret line="27" column="27" lean-forward="false" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="27" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/server/api/AlgorithmMaster.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="163" column="54" lean-forward="false" selection-start-line="163" selection-start-column="0" selection-end-line="164" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -657,20 +664,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/server/api/AlgorithmMaster.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="208" column="61" lean-forward="false" selection-start-line="208" selection-start-column="61" selection-end-line="208" selection-end-column="61" />
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/server/api/ExportCSV.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="5" column="26" lean-forward="false" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
+        <state relative-caret-position="357">
+          <caret line="33" column="42" lean-forward="true" selection-start-line="33" selection-start-column="42" selection-end-line="33" selection-end-column="42" />
           <folding />
         </state>
       </provider>
