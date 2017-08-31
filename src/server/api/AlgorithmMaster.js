@@ -175,8 +175,7 @@ export default module={
         for(let hour in hours){
             if (hours.hasOwnProperty(hour) && hours[hour] instanceof Array) {
                 hours[hour].forEach( minute => {
-                    if(minute.indexOf('a')===-1)
-                    tableOfMinutes.push(parseInt(hour)*60+parseInt(minute));
+                    tableOfMinutes.push(parseInt(hour)*60+parseInt(minute.replace('a', '')));
                 })
             }
         }
@@ -185,9 +184,8 @@ export default module={
 
     calculateResults() {
         let previousTime;
-        let currentLine;
         for(let preparedBusStopPosition=0;preparedBusStopPosition<preparedBusstops.length;preparedBusStopPosition++){
-            if(preparedBusStopPosition>0 && preparedBusstops[preparedBusStopPosition].line_no===currentLine){
+            if(preparedBusstops[preparedBusStopPosition].position!==0){
                 let time = this.findTime(preparedBusstops[preparedBusStopPosition].hours,previousTime);
                 let timeDifrence = time - previousTime;
                 let finalResult = {};
@@ -205,7 +203,6 @@ export default module={
             else
             {
                 previousTime = this.findTime(preparedBusstops[preparedBusStopPosition].hours,preferedStartHour*60);
-                currentLine = preparedBusstops[preparedBusStopPosition].line_no;
             }
         }
         let savedResult;
@@ -215,11 +212,13 @@ export default module={
     },
 
     findTime(hours,previousTime) {
+        hours = hours.filter(hour => hour>=previousTime);
         let wantedTime = hours[0];
-        for(let hour in hours){
-            if(Math.abs(previousTime - hour) < Math.abs(previousTime - wantedTime) && hour>previousTime)
-                wantedTime = hour;
-        }
+
+        hours.forEach(hour =>{
+                if(Math.abs(previousTime - hour) < Math.abs(previousTime - wantedTime))
+                    wantedTime = hour;
+        });
         return wantedTime;
     }
 };

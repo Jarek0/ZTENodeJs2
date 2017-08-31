@@ -172,7 +172,7 @@ exports.default = module = {
         var _loop = function _loop(hour) {
             if (hours.hasOwnProperty(hour) && hours[hour] instanceof Array) {
                 hours[hour].forEach(function (minute) {
-                    if (minute.indexOf('a') === -1) tableOfMinutes.push(parseInt(hour) * 60 + parseInt(minute));
+                    tableOfMinutes.push(parseInt(hour) * 60 + parseInt(minute.replace('a', '')));
                 });
             }
         };
@@ -184,9 +184,8 @@ exports.default = module = {
     },
     calculateResults: function calculateResults() {
         var previousTime = void 0;
-        var currentLine = void 0;
         for (var preparedBusStopPosition = 0; preparedBusStopPosition < preparedBusstops.length; preparedBusStopPosition++) {
-            if (preparedBusStopPosition > 0 && preparedBusstops[preparedBusStopPosition].line_no === currentLine) {
+            if (preparedBusstops[preparedBusStopPosition].position !== 0) {
                 var time = this.findTime(preparedBusstops[preparedBusStopPosition].hours, previousTime);
                 var timeDifrence = time - previousTime;
                 var finalResult = {};
@@ -202,7 +201,6 @@ exports.default = module = {
                 previousTime = time;
             } else {
                 previousTime = this.findTime(preparedBusstops[preparedBusStopPosition].hours, preferedStartHour * 60);
-                currentLine = preparedBusstops[preparedBusStopPosition].line_no;
             }
         }
         var savedResult = void 0;
@@ -211,10 +209,14 @@ exports.default = module = {
         _ExportCSV2.default.download(savedResult);
     },
     findTime: function findTime(hours, previousTime) {
+        hours = hours.filter(function (hour) {
+            return hour >= previousTime;
+        });
         var wantedTime = hours[0];
-        for (var hour in hours) {
-            if (Math.abs(previousTime - hour) < Math.abs(previousTime - wantedTime) && hour > previousTime) wantedTime = hour;
-        }
+
+        hours.forEach(function (hour) {
+            if (Math.abs(previousTime - hour) < Math.abs(previousTime - wantedTime)) wantedTime = hour;
+        });
         return wantedTime;
     }
 };

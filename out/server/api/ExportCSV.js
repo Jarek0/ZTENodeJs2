@@ -17,7 +17,7 @@ module.exports = {
         var rows = [];
         var row = void 0;
         //stworzenie nagłówków
-        row = 'Id Przystanku;Kierunek;Czas potrzebny na dojazd;Wspolrzedna x;Wspolrzedna y;Numer przystanku;Numer linii' + '\n';
+        row = 'Numer linii;Kierunek;Id przystanku;Pozycja;Wspolrzedna x;Wspolrzedna y;Roznica czasu' + '\n';
         rows.push(row);
         //dla każdego przystanku tworzy się wiersz pliku csv
         for (var i = 0; i < query.length; i++) {

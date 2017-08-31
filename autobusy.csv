@@ -1,1 +1,1 @@
-Id Przystanku;Kierunek;Czas potrzebny na dojazd;Wspolrzedna x;Wspolrzedna y;Numer przystanku;Numer linii
+Numer linii;Kierunek;Id przystanku;Pozycja;Wspolrzedna x;Wspolrzedna y;Roznica czasu
