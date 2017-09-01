@@ -124,6 +124,7 @@ export default module={
     },
 
     prepareBusstopsBeforeCalculateResults(){
+
         linesWithBusstopsPosition.forEach( lineWithBusstopPosition => {
                 if(lineWithBusstopPosition.data!==undefined)
                     lineWithBusstopPosition.data.forEach(
@@ -148,6 +149,9 @@ export default module={
 
                                 if (lineAtBusstop !== undefined && lineAtBusstop.data!== undefined)
                                 {
+                                    preparedBusstop.discription = lineAtBusstop.data.opis;
+                                    preparedBusstop.legend = lineAtBusstop.data.legenda;
+
                                     if(lineAtBusstop.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']){
                                         preparedBusstop.hours =
                                             this.flatHoursTableToTableOfMinutes(lineAtBusstop.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']);
@@ -175,7 +179,8 @@ export default module={
         for(let hour in hours){
             if (hours.hasOwnProperty(hour) && hours[hour] instanceof Array) {
                 hours[hour].forEach( minute => {
-                    tableOfMinutes.push(parseInt(hour)*60+parseInt(minute.replace('a', '')));
+                    if(/^\d+$/.test(minute))
+                    tableOfMinutes.push(parseInt(hour)*60+parseInt(minute));
                 })
             }
         }
@@ -184,9 +189,15 @@ export default module={
 
     calculateResults() {
         let previousTime;
+        let actualDiscription;
+        let actualLegend;
         for(let preparedBusStopPosition=0;preparedBusStopPosition<preparedBusstops.length;preparedBusStopPosition++){
             if(preparedBusstops[preparedBusStopPosition].position!==0){
-                let time = this.findTime(preparedBusstops[preparedBusStopPosition].hours,previousTime);
+                if(preparedBusstops[preparedBusStopPosition].discription!==actualDiscription ||
+                    preparedBusstops[preparedBusStopPosition].legend!==actualLegend)
+                    continue;
+
+                let time = this.findTime(preparedBusstops[preparedBusStopPosition].hours,previousTime,false);
                 let timeDifrence = time - previousTime;
                 let finalResult = {};
                 finalResult.line_no = preparedBusstops[preparedBusStopPosition].line_no;
@@ -202,7 +213,9 @@ export default module={
             }
             else
             {
-                previousTime = this.findTime(preparedBusstops[preparedBusStopPosition].hours,preferedStartHour*60);
+                previousTime = this.findTime(preparedBusstops[preparedBusStopPosition].hours,preferedStartHour*60,true);
+                actualDiscription = preparedBusstops[preparedBusStopPosition].discription;
+                actualLegend = preparedBusstops[preparedBusStopPosition].legend;
             }
         }
         let savedResult;
@@ -211,7 +224,8 @@ export default module={
         ExportCSV.download(savedResult);
     },
 
-    findTime(hours,previousTime) {
+    findTime(hours,previousTime,firstTime) {
+        if(!firstTime)
         hours = hours.filter(hour => hour>=previousTime);
         let wantedTime = hours[0];
 

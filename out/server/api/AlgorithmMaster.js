@@ -153,6 +153,9 @@ exports.default = module = {
                     });
 
                     if (lineAtBusstop !== undefined && lineAtBusstop.data !== undefined) {
+                        preparedBusstop.discription = lineAtBusstop.data.opis;
+                        preparedBusstop.legend = lineAtBusstop.data.legenda;
+
                         if (lineAtBusstop.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']) {
                             preparedBusstop.hours = _this.flatHoursTableToTableOfMinutes(lineAtBusstop.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']);
                         } else if (lineAtBusstop.data.godziny['POWSZEDNI LETNI']) {
@@ -172,7 +175,7 @@ exports.default = module = {
         var _loop = function _loop(hour) {
             if (hours.hasOwnProperty(hour) && hours[hour] instanceof Array) {
                 hours[hour].forEach(function (minute) {
-                    tableOfMinutes.push(parseInt(hour) * 60 + parseInt(minute.replace('a', '')));
+                    if (/^\d+$/.test(minute)) tableOfMinutes.push(parseInt(hour) * 60 + parseInt(minute));
                 });
             }
         };
@@ -184,9 +187,13 @@ exports.default = module = {
     },
     calculateResults: function calculateResults() {
         var previousTime = void 0;
+        var actualDiscription = void 0;
+        var actualLegend = void 0;
         for (var preparedBusStopPosition = 0; preparedBusStopPosition < preparedBusstops.length; preparedBusStopPosition++) {
             if (preparedBusstops[preparedBusStopPosition].position !== 0) {
-                var time = this.findTime(preparedBusstops[preparedBusStopPosition].hours, previousTime);
+                if (preparedBusstops[preparedBusStopPosition].discription !== actualDiscription || preparedBusstops[preparedBusStopPosition].legend !== actualLegend) continue;
+
+                var time = this.findTime(preparedBusstops[preparedBusStopPosition].hours, previousTime, false);
                 var timeDifrence = time - previousTime;
                 var finalResult = {};
                 finalResult.line_no = preparedBusstops[preparedBusStopPosition].line_no;
@@ -200,7 +207,9 @@ exports.default = module = {
                 finalResults.push(finalResult);
                 previousTime = time;
             } else {
-                previousTime = this.findTime(preparedBusstops[preparedBusStopPosition].hours, preferedStartHour * 60);
+                previousTime = this.findTime(preparedBusstops[preparedBusStopPosition].hours, preferedStartHour * 60, true);
+                actualDiscription = preparedBusstops[preparedBusStopPosition].discription;
+                actualLegend = preparedBusstops[preparedBusStopPosition].legend;
             }
         }
         var savedResult = void 0;
@@ -208,8 +217,8 @@ exports.default = module = {
         savedResult = _ExportCSV2.default.prepare(finalResults);
         _ExportCSV2.default.download(savedResult);
     },
-    findTime: function findTime(hours, previousTime) {
-        hours = hours.filter(function (hour) {
+    findTime: function findTime(hours, previousTime, firstTime) {
+        if (!firstTime) hours = hours.filter(function (hour) {
             return hour >= previousTime;
         });
         var wantedTime = hours[0];
