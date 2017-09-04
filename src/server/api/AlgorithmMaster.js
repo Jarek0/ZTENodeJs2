@@ -8,11 +8,12 @@ let busstops = {};
 let linesWithBusstopsPosition = {};
 let busstopsWithLineNumber = {};
 let linesAtBusstop = {};
+let test = [];
 
-let preparedBusstops = [];
 let finalResults = [];
 
-let preferedStartHour = 7;
+let preferedHour = 7;
+let minutesOfPreferedStartHour = preferedHour*60;
 
 export default module={
     getDataFromZTMAndSaveItToCSV(dropDatabase){
@@ -26,7 +27,6 @@ export default module={
             this.getDataFromDatabase();
         }
 
-        this.prepareBusstopsBeforeCalculateResults();
         this.calculateResults();
     },
 
@@ -117,122 +117,108 @@ export default module={
     getDataFromDatabase(){
         schedules = Database.readTextFile("schedules.txt");
         lines = Database.readTextFile("lines.txt");
-        linesWithBusstopsPosition = Database.readTextFile("linesWithBusstopsPosition.txt");
+        linesWithBusstopsPosition = Database.readTextFile("testData.txt");
         busstops = Database.readTextFile("busstops.txt");
         busstopsWithLineNumber = Database.readTextFile("busstopsWithLineNumber.txt");
         linesAtBusstop = Database.readTextFile("linesAtBusstop.txt");
     },
 
-    prepareBusstopsBeforeCalculateResults(){
-
+    calculateResults(){
         linesWithBusstopsPosition.forEach( lineWithBusstopPosition => {
                 if(lineWithBusstopPosition.data!==undefined)
                     lineWithBusstopPosition.data.forEach(
                         direction => {
-                            direction.data.forEach( busstopOnLine => {
-                                let preparedBusstop = {};
+                            for(let busstopOnLinePosition=0;busstopOnLinePosition<direction.data.length;busstopOnLinePosition++){
+                                let finalResult = {};
 
-                                preparedBusstop.line_no = lineWithBusstopPosition.line_no;
-                                preparedBusstop.schedule_id = lineWithBusstopPosition.schedule_id;
-                                preparedBusstop.direction_name = direction.direction_name;
+                                finalResult.line_no = lineWithBusstopPosition.line_no;
+                                finalResult.direction_name = direction.direction_name;
+                                finalResult.id = direction.data[busstopOnLinePosition].busstop;
+                                finalResult.position = direction.data[busstopOnLinePosition].position-1;
 
-                                preparedBusstop.id = busstopOnLine.busstop;
-                                preparedBusstop.position = busstopOnLine.position-1;
-
-                                let busstop = busstops.find(busStop => {return busStop.id === preparedBusstop.id});
-                                preparedBusstop.latitude = busstop.latitude;
-                                preparedBusstop.longitude = busstop.longitude;
+                                let busstop = busstops.find(busStop => {return busStop.id === finalResult.id});
+                                finalResult.latitude = busstop.latitude;
+                                finalResult.longitude = busstop.longitude;
 
                                 let lineAtBusstop = linesAtBusstop.find((lineAtBusstop) => {
-                                    return (preparedBusstop.line_no === lineAtBusstop.line_no && lineAtBusstop.busstop_no === preparedBusstop.id);
+                                    return (finalResult.line_no === lineAtBusstop.line_no && lineAtBusstop.busstop_no === finalResult.id);
                                 });
 
                                 if (lineAtBusstop !== undefined && lineAtBusstop.data!== undefined)
                                 {
-                                    preparedBusstop.discription = lineAtBusstop.data.opis;
-                                    preparedBusstop.legend = lineAtBusstop.data.legenda;
-
-                                    if(lineAtBusstop.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']){
-                                        preparedBusstop.hours =
-                                            this.flatHoursTableToTableOfMinutes(lineAtBusstop.data.godziny['DZIEŃ POWSZEDNI, ROK SZKOLNY']);
-                                    }
-                                    else if(lineAtBusstop.data.godziny['POWSZEDNI LETNI']){
-                                        preparedBusstop.hours =
-                                            this.flatHoursTableToTableOfMinutes(lineAtBusstop.data.godziny['POWSZEDNI LETNI']);
-                                    }
-                                    else{
-                                        preparedBusstop.hours =
-                                            this.flatHoursTableToTableOfMinutes(lineAtBusstop.data.godziny);
+                                    direction.data[busstopOnLinePosition].hours = lineAtBusstop.data.godziny[Object.keys(lineAtBusstop.data.godziny)[0]];
+                                    //direction.graphOfAccessPoints = this.createGraphOfAccessPoints(direction.data[busstopOnLinePosition].hours);
+                                    if(direction.data[busstopOnLinePosition].hours!==undefined && Object.keys(direction.data[busstopOnLinePosition].hours).length>0)
+                                    {
+                                        if(busstopOnLinePosition>0){
+                                            let previousTime = this.findTime(direction.data[busstopOnLinePosition-1].hours,minutesOfPreferedStartHour);
+                                            finalResult.timeDifrence = this.findTime(direction.data[busstopOnLinePosition].hours,previousTime)-previousTime;
+                                            let hourAttempt=4;
+                                            while(isNaN(finalResult.timeDifrence)){
+                                                previousTime = this.findTime(direction.data[busstopOnLinePosition-1].hours,hourAttempt);
+                                                finalResult.timeDifrence = this.findTime(direction.data[busstopOnLinePosition].hours,previousTime)-previousTime;
+                                                hourAttempt++;
+                                                if(hourAttempt>23)
+                                                    break;
+                                            }
+                                            if(!isNaN(finalResult.timeDifrence)){
+                                                let testValue = finalResult;
+                                                testValue.graphOfAccessPoints=direction.graphOfAccessPoints;
+                                                testValue.hours=direction.data[busstopOnLinePosition].hours;
+                                                test.push(testValue);
+                                                finalResults.push(finalResult);
+                                            }
+                                        }
                                     }
                                 }
-                                if(preparedBusstop.hours!==undefined && preparedBusstop.hours.length>0)
-                                    preparedBusstops.push(preparedBusstop);
-                            });
+                            }
                         }
                     )
             }
         );
-    },
 
-    flatHoursTableToTableOfMinutes(hours){
-        let tableOfMinutes = [];
-        for(let hour in hours){
-            if (hours.hasOwnProperty(hour) && hours[hour] instanceof Array) {
-                hours[hour].forEach( minute => {
-                    if(/^\d+$/.test(minute))
-                    tableOfMinutes.push(parseInt(hour)*60+parseInt(minute));
-                })
-            }
-        }
-        return tableOfMinutes;
-    },
-
-    calculateResults() {
-        let previousTime;
-        let actualDiscription;
-        let actualLegend;
-        for(let preparedBusStopPosition=0;preparedBusStopPosition<preparedBusstops.length;preparedBusStopPosition++){
-            if(preparedBusstops[preparedBusStopPosition].position!==0){
-                if(preparedBusstops[preparedBusStopPosition].discription!==actualDiscription ||
-                    preparedBusstops[preparedBusStopPosition].legend!==actualLegend)
-                    continue;
-
-                let time = this.findTime(preparedBusstops[preparedBusStopPosition].hours,previousTime,false);
-                let timeDifrence = time - previousTime;
-                let finalResult = {};
-                finalResult.line_no = preparedBusstops[preparedBusStopPosition].line_no;
-                finalResult.direction_name = preparedBusstops[preparedBusStopPosition].direction_name;
-                finalResult.id = preparedBusstops[preparedBusStopPosition].id;
-                finalResult.position = preparedBusstops[preparedBusStopPosition].position;
-                finalResult.latitude = preparedBusstops[preparedBusStopPosition].latitude;
-                finalResult.longitude = preparedBusstops[preparedBusStopPosition].longitude;
-                finalResult.longitude = preparedBusstops[preparedBusStopPosition].longitude;
-                finalResult.timeDifrence = timeDifrence;
-                finalResults.push(finalResult);
-                previousTime = time;
-            }
-            else
-            {
-                previousTime = this.findTime(preparedBusstops[preparedBusStopPosition].hours,preferedStartHour*60,true);
-                actualDiscription = preparedBusstops[preparedBusStopPosition].discription;
-                actualLegend = preparedBusstops[preparedBusStopPosition].legend;
-            }
-        }
-        let savedResult;
-        Database.saveToFile("finalResults.txt",finalResults);
-        savedResult=(ExportCSV.prepare(finalResults));
+        Database.saveToFile('test.txt',test);
+        Database.saveToFile('finalResults.txt',finalResults);
+        let savedResult=(ExportCSV.prepare(finalResults));
         ExportCSV.download(savedResult);
     },
 
-    findTime(hours,previousTime,firstTime) {
-        if(!firstTime)
-        hours = hours.filter(hour => hour>=previousTime);
-        let wantedTime = hours[0];
+    findTime(hours, preferedHour){
+        for(let hour in hours){
+            for(let minutePosition = 0;minutePosition<hours[hour].length;minutePosition++){
+                let minutes = hours[hour][minutePosition];
+                let minutesOfHour = parseInt(hour)*60+parseInt(minutes.replace(/\D/g,''));
+                if(minutesOfHour>=preferedHour){
+                    return minutesOfHour;
+                }
+            }
+        }
+    },
 
-        hours.forEach(hour =>{
-                if(Math.abs(previousTime - hour) < Math.abs(previousTime - wantedTime))
-                    wantedTime = hour;
-        });
-        return wantedTime;
+    createGraphOfAccessPoints(hours){
+        let graphOfAccessPoints = {};
+        let allPoints = 0;
+        let allAccessPointsNumber = 0;
+        for(let hour in hours){
+            if (hours.hasOwnProperty(hour) && hours[hour] instanceof Array) {
+                hours[hour].forEach( minute => {
+                    allPoints++;
+                    if((minute).length===3){
+                        let graphOfAccessPointKey = minute.charAt(2);
+                        if(Object.keys(graphOfAccessPoints).indexOf(graphOfAccessPointKey)===-1){
+                            graphOfAccessPoints[graphOfAccessPointKey]=1;
+                            allAccessPointsNumber++;
+                        }
+                        else{
+                            graphOfAccessPoints[graphOfAccessPointKey]++;
+                            allAccessPointsNumber++;
+                        }
+                    }
+                })
+            }
+        }
+        graphOfAccessPoints['normal'] = allPoints - allAccessPointsNumber;
+        graphOfAccessPoints['allPoints'] = allPoints;
+        return graphOfAccessPoints;
     }
 };
